@@ -1,0 +1,10 @@
+.page-wrap{max-width:1360px}
+.workspace{grid-template-columns:minmax(0,1fr);gap:26px}
+.entry-panel{width:100%;max-width:1320px;margin:0 auto;padding:30px}
+.section-heading{margin-bottom:24px}
+.entry-form{grid-template-columns:repeat(2,minmax(0,1fr));column-gap:28px;row-gap:20px}
+.entry-form>.totals-box{align-self:start}
+.field-grid{column-gap:20px}
+.days-grid{column-gap:16px}
+.money-field .field-error,.entry-form>label>.field-error{min-height:3.4em;margin-top:0;line-height:1.25}
+.field-error-empty{visibility:hidden}

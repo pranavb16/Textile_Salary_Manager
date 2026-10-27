@@ -1,0 +1,17 @@
+.table-wrap table{table-layout:fixed;min-width:1180px}
+.table-wrap th,.table-wrap td{padding-right:16px;padding-left:16px;vertical-align:middle}
+.table-wrap th{padding-top:14px;padding-bottom:14px;background:#f5f8f6;color:#42584a;font-size:12px;font-weight:700;letter-spacing:.1px;text-transform:none;white-space:normal;line-height:1.35}
+.table-wrap td{padding-top:15px;padding-bottom:15px}
+.table-wrap th:nth-child(1),.table-wrap td:nth-child(1){width:15%;white-space:normal}
+.table-wrap th:nth-child(2),.table-wrap td:nth-child(2){width:8%}
+.table-wrap th:nth-child(3),.table-wrap td:nth-child(3){width:12%}
+.table-wrap th:nth-child(4),.table-wrap td:nth-child(4){width:9%}
+.table-wrap th:nth-child(5),.table-wrap td:nth-child(5){width:9%}
+.table-wrap th:nth-child(6),.table-wrap td:nth-child(6){width:13%}
+.table-wrap th:nth-child(7),.table-wrap td:nth-child(7){width:12%}
+.table-wrap th:nth-child(8),.table-wrap td:nth-child(8){width:14%}
+.table-wrap th:nth-child(9),.table-wrap td:nth-child(9){width:8%;text-align:center}
+.report-section-title{margin:0 0 14px;color:#203c30;font:750 22px "Manrope",sans-serif;letter-spacing:-.4px}
+.workspace{gap:38px}
+.edit-button{min-width:66px;padding:7px 12px;border-color:#cfe0d3;background:#f7faf7;color:#176443;font-size:12px}
+.edit-button:hover{background:#edf5ef;border-color:#9fc3a9}

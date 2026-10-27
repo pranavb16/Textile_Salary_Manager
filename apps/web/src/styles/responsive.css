@@ -1,0 +1,2 @@
+@media(max-width:1000px){.entry-form{grid-template-columns:minmax(0,1fr)}.entry-panel{padding:24px}}
+@media(max-width:740px){.entry-panel{padding:18px}.entry-form{row-gap:16px}.days-grid{column-gap:8px}.money-field .field-error,.entry-form>label>.field-error{min-height:3.8em}.table-wrap th,.table-wrap td{padding-right:12px;padding-left:12px}}

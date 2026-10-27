@@ -1,0 +1,26 @@
+{
+  "name": "textile-salary-management",
+  "version": "1.0.0",
+  "private": true,
+  "engines": { "node": ">=22.18.0" },
+  "allowScripts": {
+    "@parcel/watcher": true,
+    "@prisma/engines": true,
+    "esbuild": true,
+    "prisma": true,
+    "unrs-resolver": true
+  },
+  "workspaces": ["apps/api", "apps/web", "packages/contracts"],
+  "scripts": {
+    "contracts:build": "npm run build --workspace @salary/contracts",
+    "dev": "npm run dev --workspace @salary/web",
+    "dev:api": "npm run start:dev --workspace @salary/api",
+    "dev:web": "npm run dev --workspace @salary/web",
+    "db:generate": "npm run db:generate --workspace @salary/api",
+    "db:migrate": "npm run db:migrate --workspace @salary/api",
+    "build": "npm run contracts:build && npm run db:generate && npm run build --workspace @salary/api && npm run build --workspace @salary/web",
+    "docker:up": "docker compose up --build",
+    "docker:down": "docker compose down",
+    "test": "npm run contracts:build && npm run db:generate && npm run test --workspaces --if-present"
+  }
+}

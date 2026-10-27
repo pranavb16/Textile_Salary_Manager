@@ -1,0 +1,78 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Unit {
+  id        Int        @id @default(autoincrement())
+  name      String     @unique @db.VarChar(100)
+  active    Boolean    @default(true)
+  createdAt DateTime   @default(now()) @map("created_at")
+  employees Employee[]
+
+  @@map("units")
+}
+
+model Employee {
+  id                      Int             @id @default(autoincrement())
+  unitId                  Int             @map("unit_id")
+  name                    String          @db.VarChar(120)
+  employeeCode            String?         @map("employee_code") @db.VarChar(40)
+  startingAdvanceBalance  Decimal         @default(0) @map("starting_advance_balance") @db.Decimal(14, 2)
+  active                  Boolean         @default(true)
+  createdAt               DateTime        @default(now()) @map("created_at")
+  unit                    Unit            @relation(fields: [unitId], references: [id], onDelete: Restrict)
+  payrollRecords          PayrollRecord[]
+  annualLeaveSalaries      AnnualLeaveSalary[]
+
+  @@unique([unitId, employeeCode])
+  @@unique([unitId, name])
+  @@index([unitId, active, name])
+  @@map("employees")
+}
+
+model PayrollRecord {
+  id                  Int      @id @default(autoincrement())
+  employeeId          Int      @map("employee_id")
+  period              DateTime @db.Date
+  totalDays           Int      @map("total_days")
+  shift8Days          Int      @map("shift_8_days")
+  shift12Days         Int      @map("shift_12_days")
+  shift8Rate          Decimal  @map("shift_8_rate") @db.Decimal(14, 2)
+  shift12Rate         Decimal  @map("shift_12_rate") @db.Decimal(14, 2)
+  salaryEarned        Decimal  @map("salary_earned") @db.Decimal(14, 2)
+  cashPaid            Decimal  @map("cash_paid") @db.Decimal(14, 2)
+  bankPaid            Decimal  @map("bank_paid") @db.Decimal(14, 2)
+  advanceRequested    Decimal  @default(0) @map("advance_requested") @db.Decimal(14, 2)
+  openingBalance      Decimal  @map("opening_balance") @db.Decimal(14, 2)
+  closingBalance      Decimal  @map("closing_balance") @db.Decimal(14, 2)
+  createdAt           DateTime @default(now()) @map("created_at")
+  updatedAt           DateTime @updatedAt @map("updated_at")
+  employee            Employee @relation(fields: [employeeId], references: [id], onDelete: Restrict)
+
+  @@unique([employeeId, period])
+  @@index([period, employeeId])
+  @@map("payroll_records")
+}
+
+model AnnualLeaveSalary {
+  id           Int      @id @default(autoincrement())
+  employeeId   Int      @map("employee_id")
+  startPeriod  DateTime @map("start_period") @db.Date
+  endPeriod    DateTime @map("end_period") @db.Date
+  recordCount  Int      @map("record_count")
+  totalLeaves  Int      @map("total_leaves")
+  perDaySalary Decimal  @map("per_day_salary") @db.Decimal(14, 2)
+  leaveSalary  Decimal  @map("leave_salary") @db.Decimal(14, 2)
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+  employee     Employee @relation(fields: [employeeId], references: [id], onDelete: Restrict)
+
+  @@unique([employeeId, startPeriod, endPeriod])
+  @@index([startPeriod, endPeriod])
+  @@map("annual_leave_salaries")
+}

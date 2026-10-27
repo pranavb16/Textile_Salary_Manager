@@ -1,0 +1,19 @@
+.section-heading{margin-bottom:16px}
+.entry-form{column-gap:22px;row-gap:8px}
+.entry-form label{font-size:14px}
+.days-grid label{font-size:13px}
+.field-grid{column-gap:18px}
+.days-grid{column-gap:12px}
+.field-error{font-size:12px}
+.money-field .field-error,.entry-form>label>.field-error{min-height:1.6em;line-height:1.3}
+@media(max-width:1000px){.entry-form{row-gap:8px}}
+@media(max-width:740px){.entry-form{row-gap:8px}.days-grid{column-gap:8px}.money-field .field-error,.entry-form>label>.field-error{min-height:1.8em}}
+.entry-form>.field-grid:not(.days-grid){grid-column:1/-1}
+.advance-payout-fields,.payout-summary-row{align-items:start;column-gap:18px}
+.advance-payout-fields.has-error input,.payout-summary-row.has-error input{border-color:#d92d20}
+.payout-summary-row>.totals-box{align-self:start}
+.bank-payout-cell{min-width:0}
+.bank-payout-cell .payout-error{min-height:1.3em;margin:0;line-height:1.3}
+.entry-form>.form-actions{grid-column:1/-1;align-self:start;justify-self:stretch;justify-content:center;margin-top:10px}
+.form-actions{align-items:flex-start}
+@media(max-width:740px){.advance-payout-fields,.payout-summary-row{column-gap:8px}}

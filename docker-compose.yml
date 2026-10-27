@@ -1,0 +1,48 @@
+services:
+  db:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    env_file:
+      - ./apps/api/.env
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\""]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    restart: unless-stopped
+    env_file:
+      - ./apps/api/.env
+    environment:
+      NODE_ENV: development
+    ports:
+      - "127.0.0.1:3001:3001"
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3001/api/units').then((r) => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 30s
+    volumes:
+      - .:/workspace
+      - workspace_node_modules:/workspace/node_modules
+      - api_node_modules:/workspace/apps/api/node_modules
+      - contracts_dist:/workspace/packages/contracts/dist
+    depends_on:
+      db:
+        condition: service_healthy
+    command: sh -c "cd /workspace && npm run contracts:build && npm run db:generate --workspace @salary/api && npm run db:migrate --workspace @salary/api && npm run start:dev --workspace @salary/api"
+
+volumes:
+  postgres_data:
+  workspace_node_modules:
+  api_node_modules:
+  contracts_dist:
