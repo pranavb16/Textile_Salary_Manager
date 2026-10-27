@@ -6,7 +6,8 @@
 .annual-page-heading p,.annual-leave-panel .section-heading p{color:#718076;font-size:13px;margin:6px 0 0}
 .annual-filters{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));align-items:start;gap:18px}
 .annual-filters .filter-field{width:100%;min-width:0;grid-template-rows:40px 42px auto;align-content:start}
-.annual-filters .filter-field>span,.annual-filters .filter-field>label{height:40px;display:flex;align-items:flex-end;line-height:1.25}
+.annual-filters .filter-field>span,.annual-filters .filter-field>label{height:40px;display:flex;align-items:flex-end;line-height:1.25;white-space:nowrap}
+.annual-filters .filter-field>label{width:100%;white-space:nowrap}
 .annual-filters .filter-field>.unit-picker,.annual-filters .filter-field>.month-picker,.annual-filters .filter-field>.annual-placeholder,.annual-filters .filter-field>input{width:100%;min-width:0}
 .annual-actions{grid-column:1/-1;display:flex;gap:10px;width:100%;justify-content:center;margin:0;flex-wrap:wrap}
 .annual-placeholder{height:42px;padding:11px 12px;background:#f5f8f6;border:1px solid #dce5de;border-radius:8px;color:#718076;font-size:14px}
