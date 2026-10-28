@@ -1,9 +1,12 @@
 import { jest } from "@jest/globals";
 import { BadRequestException } from "@nestjs/common";
+import { plainToInstance } from "class-transformer";
+import { validateSync } from "class-validator";
+import { payrollFormSchema } from "@salary/contracts";
 import { Prisma } from "../generated/prisma/client.js";
 import { PayrollEntryDto } from "./dto/payroll-entry.dto.js";
 import { PayrollService } from "./payroll.service.js";
-import { calculateClosingBalance, calculateEarnedSalary } from "./payroll-calculation.js";
+import { calculateClosingBalance, calculateEarnedSalary, calculateMenderEarnedSalary } from "./payroll-calculation.js";
 
 const tx = {
   employee: { findUnique: jest.fn<(...args: any[]) => Promise<any>>() },
@@ -42,6 +45,9 @@ function makeExistingRecord() {
     id: 10,
     employeeId: 1,
     period: new Date("2026-10-01T00:00:00.000Z"),
+    isMender: false,
+    mendingMetres: null,
+    mendingRate: null,
     totalDays: 1,
     shift8Days: 1,
     shift12Days: 0,
@@ -117,12 +123,61 @@ describe("PayrollService", () => {
     });
     expect(tx.payrollRecord.create).not.toHaveBeenCalled();
   });
+
+  it("saves Mender inputs and calculates salary in rupees", async () => {
+    const input = makeInput({ isMender: true, mendingMetres: "1000.50", mendingRate: "25.10", cashPaid: "0" });
+    tx.payrollRecord.findFirstOrThrow.mockResolvedValue({ id: 11 });
+
+    await service.createPayrollRecord(input);
+
+    expect(tx.payrollRecord.create).toHaveBeenCalledWith({ data: expect.objectContaining({
+      isMender: true, mendingMetres: new Prisma.Decimal("1000.50"), mendingRate: new Prisma.Decimal("25.10"),
+      totalDays: 0, shift8Days: 0, shift12Days: 0, salaryEarned: new Prisma.Decimal("251.13"),
+      closingBalance: new Prisma.Decimal("-251.13"),
+    }) });
+  });
+
+  it("updates Mender inputs even when their combined salary stays the same", async () => {
+    const existing = { ...makeExistingRecord(), isMender: true, mendingMetres: new Prisma.Decimal(1000), mendingRate: new Prisma.Decimal(25),
+      totalDays: 0, shift8Days: 0, shift12Days: 0, shift8Rate: new Prisma.Decimal(0), shift12Rate: new Prisma.Decimal(0),
+      salaryEarned: new Prisma.Decimal(250), cashPaid: new Prisma.Decimal(0), closingBalance: new Prisma.Decimal(-250) };
+    tx.payrollRecord.findUnique.mockResolvedValue(existing);
+    tx.payrollRecord.findMany.mockResolvedValue([existing]);
+    tx.payrollRecord.findFirstOrThrow.mockResolvedValue({ id: 10 });
+
+    await service.updatePayrollRecord(10, makeInput({ isMender: true, mendingMetres: "500", mendingRate: "50", cashPaid: "0" }));
+
+    expect(tx.payrollRecord.update).toHaveBeenCalledWith({ where: { id: 10 }, data: expect.objectContaining({
+      isMender: true, mendingMetres: new Prisma.Decimal(500), mendingRate: new Prisma.Decimal(50), salaryEarned: new Prisma.Decimal(250),
+    }) });
+  });
+
+  it("preserves a later Mender entry when an earlier balance is recalculated", async () => {
+    const later = { ...makeExistingRecord(), id: 12, period: new Date("2026-11-01T00:00:00.000Z"), isMender: true,
+      mendingMetres: new Prisma.Decimal("1000"), mendingRate: new Prisma.Decimal("25"),
+      totalDays: 0, shift8Days: 0, shift12Days: 0, shift8Rate: new Prisma.Decimal(0), shift12Rate: new Prisma.Decimal(0),
+      salaryEarned: new Prisma.Decimal(250), cashPaid: new Prisma.Decimal(0), openingBalance: new Prisma.Decimal(0), closingBalance: new Prisma.Decimal(-250) };
+    tx.payrollRecord.findMany.mockResolvedValue([later]);
+    tx.payrollRecord.findFirstOrThrow.mockResolvedValue({ id: 11 });
+
+    await service.createPayrollRecord(makeInput({ shift8Rate: "200", cashPaid: "0" }));
+
+    expect(tx.payrollRecord.update).toHaveBeenCalledWith({ where: { id: 12 }, data: expect.objectContaining({
+      isMender: true, mendingMetres: new Prisma.Decimal(1000), mendingRate: new Prisma.Decimal(25),
+      salaryEarned: new Prisma.Decimal(250), closingBalance: new Prisma.Decimal(-450),
+    }) });
+  });
 });
 
 describe("payroll calculations", () => {
   it("allows more than 30 shift days and multiplies both rates correctly", () => {
     const earned = calculateEarnedSalary(8, new Prisma.Decimal("500"), 30, new Prisma.Decimal("800"));
     expect(earned.toString()).toBe("28000");
+  });
+
+  it("rounds Mender salary to the nearest paisa and rejects amounts outside storage range", () => {
+    expect(calculateMenderEarnedSalary(new Prisma.Decimal("1"), new Prisma.Decimal("0.50")).toFixed(2)).toBe("0.01");
+    expect(() => calculateMenderEarnedSalary(new Prisma.Decimal("999999999999"), new Prisma.Decimal("101"))).toThrow(BadRequestException);
   });
 
   it("carries held salary forward and permits it to be paid in a later month", () => {
@@ -134,5 +189,30 @@ describe("payroll calculations", () => {
 
   it("rejects payout greater than earned wages plus held salary", () => {
     expect(() => calculateClosingBalance({ openingBalance: new Prisma.Decimal(0), newAdvance: new Prisma.Decimal(0), salaryEarned: new Prisma.Decimal(20000), cashPaid: new Prisma.Decimal(1000), bankPaid: new Prisma.Decimal(20000) })).toThrow(BadRequestException);
+  });
+});
+
+describe("Mender payroll validation", () => {
+  const form = { employeeId: "1", period: "2026-10", isMender: true, mendingMetres: "1000.50", mendingRate: "25.10",
+    totalDays: "", shift8Days: "", shift12Days: "", shift8Rate: "", shift12Rate: "", cashPaid: "0", bankPaid: "0", advanceRequested: "0" };
+
+  it("accepts Mender inputs without shift details on the form and API", () => {
+    const parsed = payrollFormSchema.parse(form);
+    expect(parsed).toMatchObject({ isMender: true, totalDays: 0, mendingMetres: "1000.50", mendingRate: "25.10" });
+    expect(validateSync(plainToInstance(PayrollEntryDto, parsed))).toHaveLength(0);
+    expect(validateSync(plainToInstance(PayrollEntryDto, {
+      employeeId: 1, period: "2026-10", isMender: true, mendingMetres: "1000.50", mendingRate: "25.10",
+      cashPaid: "0", bankPaid: "0", advanceRequested: "0",
+    }))).toHaveLength(0);
+  });
+
+  it("rejects zero, missing, and overly precise Mender inputs", () => {
+    expect(payrollFormSchema.safeParse({ ...form, mendingMetres: "0" }).success).toBe(false);
+    expect(payrollFormSchema.safeParse({ ...form, mendingMetres: "-1" }).success).toBe(false);
+    expect(payrollFormSchema.safeParse({ ...form, mendingRate: "0" }).success).toBe(false);
+    expect(payrollFormSchema.safeParse({ ...form, mendingRate: "-1" }).success).toBe(false);
+    expect(payrollFormSchema.safeParse({ ...form, mendingRate: "" }).success).toBe(false);
+    expect(validateSync(plainToInstance(PayrollEntryDto, { ...makeInput(), isMender: true, mendingMetres: "10", mendingRate: "0.001" })).some((error) => error.property === "mendingRate")).toBe(true);
+    expect(validateSync(plainToInstance(PayrollEntryDto, { ...makeInput(), isMender: true, mendingMetres: "-1", mendingRate: "0" })).map((error) => error.property)).toEqual(expect.arrayContaining(["mendingMetres", "mendingRate"]));
   });
 });

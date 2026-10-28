@@ -14,10 +14,19 @@ import type { FieldErrors, Form, FormField, RecordRow, Employee, Unit } from "..
 
 const currentDate = new Date();
 const monthNow = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, "0")}`;
-const emptyForm: Form = { employeeId: "", totalDays: "", shift8Days: "", shift12Days: "", shift8Rate: "", shift12Rate: "", cashPaid: "", bankPaid: "", advanceRequested: "0" };
+const emptyForm: Form = { employeeId: "", isMender: false, mendingMetres: "", mendingRate: "", totalDays: "", shift8Days: "", shift12Days: "", shift8Rate: "", shift12Rate: "", cashPaid: "", bankPaid: "", advanceRequested: "0" };
 const messageDismissDelay = 5000;
 
 const dayTotalValidationMessage = "Shift days must be equal to total days.";
+
+function menderSalary(metres: string, rate: string) {
+  function hundredths(value: string) {
+    if (!/^\d{1,12}(?:\.\d{1,2})?$/.test(value)) return 0n;
+    const [whole, fraction = ""] = value.split(".");
+    return BigInt(whole) * 100n + BigInt((fraction + "00").slice(0, 2));
+  }
+  return Number((hundredths(metres) * hundredths(rate) + 5000n) / 10000n) / 100;
+}
 
 function payrollErrors(form: Form, period: string, showDayTotalMismatch: boolean): FieldErrors {
   const result = payrollFormSchema.safeParse({ ...form, period });
@@ -110,7 +119,7 @@ export default function PayrollApp() {
   const openingBalance = editingId
     ? records.find((record) => record.id === editingId)?.openingBalance ?? selectedEmployee?.openingBalance ?? "0"
     : selectedEmployee?.openingBalance ?? selectedEmployee?.startingAdvanceBalance ?? "0";
-  const earned = useMemo(() => money(form.shift8Days) * money(form.shift8Rate) + money(form.shift12Days) * money(form.shift12Rate), [form]);
+  const earned = useMemo(() => form.isMender ? menderSalary(form.mendingMetres, form.mendingRate) : money(form.shift8Days) * money(form.shift8Rate) + money(form.shift12Days) * money(form.shift12Rate), [form]);
   const payoutTotal = money(form.cashPaid) + money(form.bankPaid);
   const availablePayout = earned + Math.max(0, -money(openingBalance));
   const payoutError = payoutTotal > availablePayout ? "Cash and bank exceed available salary." : undefined;
@@ -166,7 +175,7 @@ export default function PayrollApp() {
 
   function editPayroll(row: RecordRow) {
     setEditingId(row.id);
-    setForm({ employeeId: String(row.employeeId), totalDays: String(row.totalDays), shift8Days: String(row.shift8Days), shift12Days: String(row.shift12Days), shift8Rate: row.shift8Rate, shift12Rate: row.shift12Rate, cashPaid: row.cashPaid, bankPaid: row.bankPaid, advanceRequested: row.advanceRequested });
+    setForm({ employeeId: String(row.employeeId), isMender: row.isMender, mendingMetres: row.mendingMetres ?? "", mendingRate: row.mendingRate ?? "", totalDays: String(row.totalDays), shift8Days: String(row.shift8Days), shift12Days: String(row.shift12Days), shift8Rate: row.shift8Rate, shift12Rate: row.shift12Rate, cashPaid: row.cashPaid, bankPaid: row.bankPaid, advanceRequested: row.advanceRequested });
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
@@ -198,6 +207,7 @@ export default function PayrollApp() {
           closingBalance={closingBalance}
           onSubmit={savePayroll}
           onSelectWorker={() => setChooseWorker(true)}
+          onMenderChange={(isMender) => setForm((current) => ({ ...current, isMender }))}
           onFieldChange={(key, value) => set(key, value)}
           onFieldBlur={blurField}
           onCancelEdit={resetForm}

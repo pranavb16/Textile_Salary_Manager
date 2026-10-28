@@ -39,6 +39,9 @@ model PayrollRecord {
   id                  Int      @id @default(autoincrement())
   employeeId          Int      @map("employee_id")
   period              DateTime @db.Date
+  isMender            Boolean  @default(false) @map("is_mender")
+  mendingMetres       Decimal? @map("mending_metres") @db.Decimal(14, 2)
+  mendingRate         Decimal? @map("mending_rate") @db.Decimal(14, 2)
   totalDays           Int      @map("total_days")
   shift8Days          Int      @map("shift_8_days")
   shift12Days         Int      @map("shift_12_days")

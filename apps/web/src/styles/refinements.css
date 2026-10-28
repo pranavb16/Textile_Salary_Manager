@@ -9,6 +9,11 @@
 @media(max-width:1000px){.entry-form{row-gap:8px}}
 @media(max-width:740px){.entry-form{row-gap:8px}.days-grid{column-gap:8px}.money-field .field-error,.entry-form>label>.field-error{min-height:1.8em}}
 .entry-form>.field-grid:not(.days-grid){grid-column:1/-1}
+.worker-entry{min-width:0}
+.days-grid{align-self:start;align-items:start}
+.worker-entry>label:first-child,.entry-form .days-grid .money-field{font-size:14px;line-height:1.3;align-content:start}
+.worker-entry>.mender-toggle{display:flex;align-items:center;gap:8px;margin:4px 0 12px;color:#52645a}
+.entry-form .mender-toggle input{width:18px;height:18px;padding:0;accent-color:#175c42;flex:none}
 .advance-payout-fields,.payout-summary-row{align-items:start;column-gap:18px}
 .advance-payout-fields.has-error input,.payout-summary-row.has-error input{border-color:#d92d20}
 .payout-summary-row>.totals-box{align-self:start}

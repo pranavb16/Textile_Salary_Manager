@@ -2,7 +2,7 @@ import { BadRequestException, ConflictException, Injectable, NotFoundException }
 import { Prisma } from "../generated/prisma/client.js";
 import { PrismaService } from "../prisma/prisma.service.js";
 import type { PayrollEntryDto } from "./dto/payroll-entry.dto.js";
-import { calculateClosingBalance, calculateEarnedSalary } from "./payroll-calculation.js";
+import { calculateClosingBalance, calculateEarnedSalary, calculateMenderEarnedSalary } from "./payroll-calculation.js";
 
 function periodDate(period: string) {
   if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(period)) throw new BadRequestException("Select a valid payroll month.");
@@ -10,17 +10,23 @@ function periodDate(period: string) {
 }
 
 function toEntry(input: PayrollEntryDto) {
-  const shift8Rate = new Prisma.Decimal(input.shift8Rate);
-  const shift12Rate = new Prisma.Decimal(input.shift12Rate);
+  const isMender = input.isMender === true;
+  const mendingMetres = isMender ? new Prisma.Decimal(input.mendingMetres!) : null;
+  const mendingRate = isMender ? new Prisma.Decimal(input.mendingRate!) : null;
+  const shift8Rate = new Prisma.Decimal(isMender ? 0 : input.shift8Rate);
+  const shift12Rate = new Prisma.Decimal(isMender ? 0 : input.shift12Rate);
   return {
     employeeId: input.employeeId,
     period: periodDate(input.period),
-    totalDays: input.totalDays,
-    shift8Days: input.shift8Days,
-    shift12Days: input.shift12Days,
+    isMender,
+    mendingMetres,
+    mendingRate,
+    totalDays: isMender ? 0 : input.totalDays,
+    shift8Days: isMender ? 0 : input.shift8Days,
+    shift12Days: isMender ? 0 : input.shift12Days,
     shift8Rate,
     shift12Rate,
-    salaryEarned: calculateEarnedSalary(input.shift8Days, shift8Rate, input.shift12Days, shift12Rate),
+    salaryEarned: isMender ? calculateMenderEarnedSalary(mendingMetres!, mendingRate!) : calculateEarnedSalary(input.shift8Days, shift8Rate, input.shift12Days, shift12Rate),
     cashPaid: new Prisma.Decimal(input.cashPaid),
     bankPaid: new Prisma.Decimal(input.bankPaid),
     advanceRequested: new Prisma.Decimal(input.advanceRequested),
@@ -40,6 +46,9 @@ function payrollRecordChanged(
 ) {
   return record.employeeId !== data.employeeId
     || record.period.getTime() !== data.period.getTime()
+    || record.isMender !== data.isMender
+    || (record.mendingMetres === null ? data.mendingMetres !== null : data.mendingMetres === null || !record.mendingMetres.equals(data.mendingMetres))
+    || (record.mendingRate === null ? data.mendingRate !== null : data.mendingRate === null || !record.mendingRate.equals(data.mendingRate))
     || record.totalDays !== data.totalDays
     || record.shift8Days !== data.shift8Days
     || record.shift12Days !== data.shift12Days
@@ -118,6 +127,9 @@ export class PayrollService {
           data: record.id === editId ? proposed : {
             employeeId: record.employeeId,
             period: record.period,
+            isMender: record.isMender,
+            mendingMetres: record.mendingMetres,
+            mendingRate: record.mendingRate,
             totalDays: record.totalDays,
             shift8Days: record.shift8Days,
             shift12Days: record.shift12Days,

@@ -1,11 +1,14 @@
 import { Transform } from "class-transformer";
 import {
   IsInt,
+  IsBoolean,
+  IsOptional,
   IsString,
   Matches,
   Max,
   Min,
   Validate,
+  ValidateIf,
   ValidationArguments,
   ValidatorConstraint,
   ValidatorConstraintInterface,
@@ -50,28 +53,49 @@ export class PayrollEntryDto {
   @Matches(/^\d{4}-(0[1-9]|1[0-2])$/, { message: "Choose a valid payroll month." })
   period!: string;
 
+  @IsOptional()
+  @IsBoolean()
+  isMender?: boolean;
+
+  @ValidateIf((entry: PayrollEntryDto) => entry.isMender === true)
+  @Transform(({ value }) => typeof value === "string" ? value.trim() : value)
+  @IsString()
+  @Matches(/^(?=.*[1-9])\d{1,12}(\.\d{1,2})?$/, { message: "Enter metres greater than 0 with up to two decimal places." })
+  mendingMetres?: string;
+
+  @ValidateIf((entry: PayrollEntryDto) => entry.isMender === true)
+  @Transform(({ value }) => typeof value === "string" ? value.trim() : value)
+  @IsString()
+  @Matches(/^(?=.*[1-9])\d{1,12}(\.\d{1,2})?$/, { message: "Enter a rate greater than 0 with up to two decimal places." })
+  mendingRate?: string;
+
+  @ValidateIf((entry: PayrollEntryDto) => entry.isMender !== true)
   @IsInt()
   @Min(1, { message: "Enter at least 1 day." })
   @Max(maxInteger, { message: "Enter a valid number of days." })
   @Validate(ShiftDaysMatchTotal)
   totalDays!: number;
 
+  @ValidateIf((entry: PayrollEntryDto) => entry.isMender !== true)
   @IsInt()
   @Min(0)
   @Max(maxInteger, { message: "Enter a valid number of days." })
   shift8Days!: number;
 
+  @ValidateIf((entry: PayrollEntryDto) => entry.isMender !== true)
   @IsInt()
   @Min(0)
   @Max(maxInteger, { message: "Enter a valid number of days." })
   shift12Days!: number;
 
+  @ValidateIf((entry: PayrollEntryDto) => entry.isMender !== true)
   @Transform(({ value }) => typeof value === "string" ? value.trim() || "0" : value)
   @IsString()
   @Matches(moneyPattern, { message: "Enter a valid amount." })
   @Validate(PositiveRateForWorkedShift, ["shift8Days"])
   shift8Rate!: string;
 
+  @ValidateIf((entry: PayrollEntryDto) => entry.isMender !== true)
   @Transform(({ value }) => typeof value === "string" ? value.trim() || "0" : value)
   @IsString()
   @Matches(moneyPattern, { message: "Enter a valid amount." })

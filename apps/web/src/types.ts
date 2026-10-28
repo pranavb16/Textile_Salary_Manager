@@ -11,6 +11,9 @@ export type RecordRow = {
   id: number;
   employeeId: number;
   period: string;
+  isMender: boolean;
+  mendingMetres: string | null;
+  mendingRate: string | null;
   totalDays: number;
   shift8Days: number;
   shift12Days: number;
@@ -26,6 +29,9 @@ export type RecordRow = {
 };
 export type Form = {
   employeeId: string;
+  isMender: boolean;
+  mendingMetres: string;
+  mendingRate: string;
   totalDays: string;
   shift8Days: string;
   shift12Days: string;
@@ -35,7 +41,7 @@ export type Form = {
   bankPaid: string;
   advanceRequested: string;
 };
-export type FormField = keyof Form;
+export type FormField = Exclude<keyof Form, "isMender">;
 export type FieldErrors = Partial<Record<FormField, string>>;
 
 export type AnnualOptions = { latestPeriod: string | null; earliestPeriod: string | null };

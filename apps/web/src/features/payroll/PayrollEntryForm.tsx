@@ -23,6 +23,7 @@ export function PayrollEntryForm({
   closingBalance,
   onSubmit,
   onSelectWorker,
+  onMenderChange,
   onFieldChange,
   onFieldBlur,
   onCancelEdit,
@@ -46,6 +47,7 @@ export function PayrollEntryForm({
   closingBalance: number;
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
   onSelectWorker: () => void;
+  onMenderChange: (value: boolean) => void;
   onFieldChange: (key: FormField, value: string) => void;
   onFieldBlur: (key: FormField) => void;
   onCancelEdit: () => void;
@@ -53,8 +55,13 @@ export function PayrollEntryForm({
 }) {
   return <section className="panel entry-panel"><div className="section-heading"><h1>Worker payroll entry</h1></div>
     {!unitSelected ? <div className="empty-hint">Choose a month and unit to start entering payroll.</div> : <form onSubmit={onSubmit} className="entry-form" noValidate>
-      <label>Worker<button type="button" className="worker-select" onClick={onSelectWorker}>{selectedEmployeeName || "Select one worker"}<UsersRound size={17} /></button><small className={`field-error${(submitted || touched.employeeId) && fieldErrors.employeeId ? "" : " field-error-empty"}`} aria-live="polite">{(submitted || touched.employeeId) ? fieldErrors.employeeId ?? "\u00a0" : "\u00a0"}</small></label>
-      <div className="field-grid days-grid">
+      <div className="worker-entry"><label>Worker<button type="button" className="worker-select" onClick={onSelectWorker}>{selectedEmployeeName || "Select one worker"}<UsersRound size={17} /></button><small className={`field-error${(submitted || touched.employeeId) && fieldErrors.employeeId ? "" : " field-error-empty"}`} aria-live="polite">{(submitted || touched.employeeId) ? fieldErrors.employeeId ?? "\u00a0" : "\u00a0"}</small></label>
+        <label className="mender-toggle"><input type="checkbox" checked={form.isMender} onChange={(event) => onMenderChange(event.target.checked)} /> Is this worker a Mender?</label>
+      </div>
+      {form.isMender ? <div className="field-grid">
+        <MoneyInput label="Total metres mended" value={form.mendingMetres} onChange={(value) => onFieldChange("mendingMetres", value)} onBlur={() => onFieldBlur("mendingMetres")} error={(submitted || touched.mendingMetres) ? fieldErrors.mendingMetres : undefined} min={0.01} step={0.01} positive />
+        <MoneyInput label="Mending rate (paise per metre)" value={form.mendingRate} onChange={(value) => onFieldChange("mendingRate", value)} onBlur={() => onFieldBlur("mendingRate")} error={(submitted || touched.mendingRate) ? fieldErrors.mendingRate : undefined} min={0.01} step={0.01} positive />
+      </div> : <><div className="field-grid days-grid">
         <MoneyInput label="Total working days" value={form.totalDays} onChange={(value) => onFieldChange("totalDays", value)} onBlur={() => onFieldBlur("totalDays")} error={(submitted || touched.totalDays || touched.shift8Days || touched.shift12Days) ? totalDaysError : undefined} whole min={1} />
         <MoneyInput label="8-hour days" value={form.shift8Days} onChange={(value) => onFieldChange("shift8Days", value)} onBlur={() => onFieldBlur("shift8Days")} error={(submitted || touched.shift8Days) ? fieldErrors.shift8Days : undefined} whole min={0} required={false} />
         <MoneyInput label="12-hour days" value={form.shift12Days} onChange={(value) => onFieldChange("shift12Days", value)} onBlur={() => onFieldBlur("shift12Days")} error={(submitted || touched.shift12Days) ? fieldErrors.shift12Days : undefined} whole min={0} required={false} />
@@ -63,6 +70,7 @@ export function PayrollEntryForm({
         <MoneyInput label="Pay per 8-hour shift" value={form.shift8Rate} onChange={(value) => onFieldChange("shift8Rate", value)} onBlur={() => onFieldBlur("shift8Rate")} error={(submitted || touched.shift8Rate) ? fieldErrors.shift8Rate : undefined} required={false} />
         <MoneyInput label="Pay per 12-hour shift" value={form.shift12Rate} onChange={(value) => onFieldChange("shift12Rate", value)} onBlur={() => onFieldBlur("shift12Rate")} error={(submitted || touched.shift12Rate) ? fieldErrors.shift12Rate : undefined} required={false} />
       </div>
+      </>}
       <div className={`field-grid advance-payout-fields${(submitted || touched.cashPaid || touched.bankPaid) && payoutError ? " has-error" : ""}`}>
         <MoneyInput label="New Advance Issued" value={form.advanceRequested} onChange={(value) => onFieldChange("advanceRequested", value)} onBlur={() => onFieldBlur("advanceRequested")} error={(submitted || touched.advanceRequested) ? fieldErrors.advanceRequested : undefined} />
         <MoneyInput label="Cash payout" value={form.cashPaid} onChange={(value) => onFieldChange("cashPaid", value)} onBlur={() => onFieldBlur("cashPaid")} error={(submitted || touched.cashPaid) ? fieldErrors.cashPaid : undefined} />

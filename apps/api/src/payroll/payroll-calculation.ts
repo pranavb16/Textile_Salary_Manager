@@ -15,6 +15,12 @@ export function calculateEarnedSalary(
   return salary;
 }
 
+export function calculateMenderEarnedSalary(metres: Prisma.Decimal, rateInPaise: Prisma.Decimal) {
+  const salary = metres.mul(rateInPaise).dividedBy(100).toDecimalPlaces(2, Prisma.Decimal.ROUND_HALF_UP);
+  if (salary.greaterThan(maxStoredAmount)) throw new BadRequestException("The calculated salary exceeds the supported amount range.");
+  return salary;
+}
+
 // Calculates the closing balance based on the input data
 export function calculateClosingBalance(input: {
   openingBalance: Prisma.Decimal;

@@ -2,7 +2,6 @@ import { z } from "zod";
 
 const money = z.string().trim().regex(/^\d{1,12}(\.\d{1,2})?$/, "Enter a valid amount.");
 const optionalShiftRate = z.string().trim().refine((amount) => amount === "" || /^\d{1,12}(\.\d{1,2})?$/.test(amount), "Enter a valid amount.");
-const totalDayCount = z.number().int().min(1, "Enter at least 1 day.").max(2_147_483_647, "Enter a valid number of days.");
 const shiftDayCount = z.number().int().nonnegative().max(2_147_483_647, "Enter a valid number of days.");
 
 const unitName = z.string().trim().min(1, "Enter a unit name.").max(100, "Unit name must be 100 characters or fewer.").regex(/^(?=.*\p{L})[\p{L}\p{N} ]+$/u, "Use letters and numbers, with at least one letter.");
@@ -26,7 +25,10 @@ export const createEmployeeSchema = z.object({
 export const payrollEntrySchema = z.object({
   employeeId: z.number().int().positive().max(2_147_483_647),
   period: z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/),
-  totalDays: totalDayCount,
+  isMender: z.boolean().default(false),
+  mendingMetres: money.optional(),
+  mendingRate: money.optional(),
+  totalDays: shiftDayCount,
   shift8Days: shiftDayCount,
   shift12Days: shiftDayCount,
   shift8Rate: optionalShiftRate,
@@ -35,6 +37,12 @@ export const payrollEntrySchema = z.object({
   bankPaid: money,
   advanceRequested: money,
 }).superRefine((entry, context) => {
+  if (entry.isMender) {
+    if (!entry.mendingMetres || Number(entry.mendingMetres) <= 0) context.addIssue({ code: "custom", message: "Enter metres greater than 0.", path: ["mendingMetres"] });
+    if (!entry.mendingRate || Number(entry.mendingRate) <= 0) context.addIssue({ code: "custom", message: "Enter a rate greater than 0.", path: ["mendingRate"] });
+    return;
+  }
+  if (entry.totalDays < 1) context.addIssue({ code: "custom", message: "Enter at least 1 day.", path: ["totalDays"] });
   if (entry.shift8Days + entry.shift12Days !== entry.totalDays) {
     context.addIssue({ code: "custom", message: "Shift days must be equal to total days.", path: ["totalDays"] });
   }
@@ -46,6 +54,8 @@ export const payrollEntrySchema = z.object({
   }
 }).transform((entry) => ({
   ...entry,
+  mendingMetres: entry.isMender ? entry.mendingMetres : undefined,
+  mendingRate: entry.isMender ? entry.mendingRate : undefined,
   shift8Rate: entry.shift8Rate.trim() === "" ? "0" : entry.shift8Rate,
   shift12Rate: entry.shift12Rate.trim() === "" ? "0" : entry.shift12Rate,
 }));
@@ -53,20 +63,33 @@ export const payrollEntrySchema = z.object({
 export const payrollFormSchema = z.object({
   employeeId: z.string().regex(/^[1-9]\d*$/, "Choose one worker."),
   period: z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/, "Choose a payroll month."),
-  totalDays: z.string().regex(/^\d+$/, "Enter a whole number of days."),
-  shift8Days: z.string().regex(/^\d*$/, "Enter a whole number of days."),
-  shift12Days: z.string().regex(/^\d*$/, "Enter a whole number of days."),
-  shift8Rate: optionalShiftRate,
-  shift12Rate: optionalShiftRate,
+  isMender: z.boolean(),
+  mendingMetres: z.string(),
+  mendingRate: z.string(),
+  totalDays: z.string(),
+  shift8Days: z.string(),
+  shift12Days: z.string(),
+  shift8Rate: z.string(),
+  shift12Rate: z.string(),
   cashPaid: money,
   bankPaid: money,
   advanceRequested: money,
-}).transform((entry) => ({
+}).superRefine((entry, context) => {
+  if (!entry.isMender) {
+    for (const field of ["totalDays", "shift8Days", "shift12Days"] as const) {
+      if (!/^\d*$/.test(entry[field])) context.addIssue({ code: "custom", message: "Enter a whole number of days.", path: [field] });
+    }
+  }
+}).transform((entry): z.input<typeof payrollEntrySchema> => ({
   ...entry,
   employeeId: Number(entry.employeeId),
-  totalDays: Number(entry.totalDays),
-  shift8Days: Number(entry.shift8Days || 0),
-  shift12Days: Number(entry.shift12Days || 0),
+  totalDays: entry.isMender ? 0 : Number(entry.totalDays || 0),
+  shift8Days: entry.isMender ? 0 : Number(entry.shift8Days || 0),
+  shift12Days: entry.isMender ? 0 : Number(entry.shift12Days || 0),
+  shift8Rate: entry.isMender ? "0" : entry.shift8Rate,
+  shift12Rate: entry.isMender ? "0" : entry.shift12Rate,
+  mendingMetres: entry.isMender ? entry.mendingMetres : undefined,
+  mendingRate: entry.isMender ? entry.mendingRate : undefined,
 })).pipe(payrollEntrySchema);
 
 export type CreateUnitInput = z.infer<typeof createUnitSchema>;
