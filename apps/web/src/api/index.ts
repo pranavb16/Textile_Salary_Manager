@@ -30,7 +30,7 @@ export function savePayrollRecord(id: number | null, input: PayrollEntryInput) {
 }
 
 export function createUnit(input: CreateUnitInput) {
-  return request("/units", { method: "POST", body: JSON.stringify(input) });
+  return request<Unit>("/units", { method: "POST", body: JSON.stringify(input) });
 }
 
 export function createEmployee(input: CreateEmployeeInput) {

@@ -155,20 +155,26 @@ export default function PayrollApp() {
   async function addUnit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault(); setError(""); setUnitNameSubmitted(true);
     const result = createUnitSchema.safeParse({ name: unitName });
-    if (!result.success) { setError(result.error.issues[0]?.message ?? "Check the unit name."); closeManageDialog(); return; }
-    try { await createUnit(result.data); setUnitName(""); await reload(); setNotice("Unit added."); closeManageDialog(); }
+    if (!result.success) return;
+    try {
+      const createdUnit = await createUnit(result.data);
+      setUnitName(""); setUnitNameTouched(false); setUnitNameSubmitted(false);
+      setUnitId(String(createdUnit.id));
+      await reload(); setNotice("Unit added. You can now add workers to it.");
+    }
     catch (cause) { setError(cause instanceof Error ? cause.message : "Could not add the unit."); closeManageDialog(); }
   }
 
   async function addEmployee(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault(); setError(""); setEmployeeSubmitted(true);
+    setUnitNameTouched(false); setUnitNameSubmitted(false);
     const result = createEmployeeSchema.safeParse({
       name: employeeName,
       employeeCode: employeeCode || null,
       unitId: Number(unitId),
       ...(employeeStartingBalance ? { startingAdvanceBalance: employeeStartingBalance } : {}),
     });
-    if (!result.success) { setError(result.error.issues[0]?.message ?? "Check the worker fields."); closeManageDialog(); return; }
+    if (!result.success) return;
     try { await createEmployee(result.data); setEmployeeName(""); setEmployeeCode(""); setEmployeeStartingBalance(""); await reload(); setNotice("Worker added to this unit."); closeManageDialog(); }
     catch (cause) { setError(cause instanceof Error ? cause.message : "Could not add the worker."); closeManageDialog(); }
   }
@@ -219,6 +225,7 @@ export default function PayrollApp() {
     <WorkerPicker open={chooseWorker} employees={employees} onClose={() => setChooseWorker(false)} onSelect={(employee) => { set("employeeId", String(employee.id)); setChooseWorker(false); }} />
     <ManageDataDialog
       open={manageData}
+      units={units}
       unitId={unitId}
       unitName={unitName}
       unitNameTouched={unitNameTouched}
@@ -235,6 +242,7 @@ export default function PayrollApp() {
       employeeCodeError={employeeCodeError}
       employeeStartingBalanceError={employeeStartingBalanceError}
       onClose={closeManageDialog}
+      onUnitChange={(value) => { setUnitId(value); resetForm(); }}
       onUnitNameChange={setUnitName}
       onUnitNameBlur={() => setUnitNameTouched(true)}
       onEmployeeNameChange={setEmployeeName}

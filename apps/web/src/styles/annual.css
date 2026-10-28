@@ -34,15 +34,15 @@
 .month-option:disabled,.month-year-nav:disabled{opacity:.38;cursor:not-allowed}
 @media(max-width:1100px){.annual-filters{grid-template-columns:repeat(2,minmax(0,1fr))}.annual-actions{grid-column:1/-1}}
 @media(max-width:740px){.page-tabs{padding:10px 12px 0}.page-tab{padding:10px 12px;font-size:12px}.annual-filters{grid-template-columns:1fr}.annual-filters .filter-field,.annual-filters .filter-field:first-child,.annual-filters .filter-field:nth-child(2){width:100%;grid-column:1;grid-row:auto}.annual-filters .filter-field>span,.annual-filters .filter-field>label{height:auto;min-height:0}.annual-actions{grid-column:1;grid-row:auto;margin:0;display:grid;grid-template-columns:1fr 1fr}.annual-actions .button{font-size:12px;padding:10px}.annual-leave-panel{padding:18px}.annual-leave-row{grid-template-columns:1fr 1fr;gap:12px}.annual-worker{grid-column:1/-1}}
-@media print{.page-tabs,.annual-page-heading,.annual-filters,.annual-range-hint,.annual-leave-panel,.annual-page>.empty-hint{display:none!important}.annual-page{padding:0}.annual-table-wrap{overflow:visible}.annual-table-wrap table{min-width:0;width:100%;table-layout:auto}.annual-table-wrap th,.annual-table-wrap td{padding:7px 5px;font-size:9pt;white-space:normal;overflow-wrap:anywhere}.annual-table-wrap th:first-child,.annual-table-wrap td:first-child{min-width:0}.annual-total-row{break-inside:avoid}}
+@media print{.page-tabs,.annual-page-heading,.annual-filters,.annual-range-hint,.annual-leave-panel,.annual-page>.empty-hint{display:none!important}.annual-page{padding:0}.annual-table-wrap{overflow:visible}.annual-table-wrap table{min-width:0;width:100%;table-layout:fixed}.annual-table-wrap th,.annual-table-wrap td{padding:7px 4px;font-size:10pt;line-height:1.25;white-space:normal;overflow-wrap:anywhere}.annual-table-wrap th:first-child,.annual-table-wrap td:first-child{min-width:0;width:20%!important}.annual-table-wrap td small{font-size:8.5pt}.annual-total-row{break-inside:avoid}}
 @page{size:landscape;margin:8mm}
 @media print{
   .report-section:not(.annual-report-section){break-inside:auto}
   .report-section:not(.annual-report-section) .report-panel{overflow:visible!important}
   .report-section:not(.annual-report-section) .table-wrap{overflow:visible!important;width:100%}
-  .report-section:not(.annual-report-section) .table-wrap table{width:100%!important;min-width:0!important;table-layout:fixed!important;font-size:8pt!important}
+  .report-section:not(.annual-report-section) .table-wrap table{width:100%!important;min-width:0!important;table-layout:fixed!important;font-size:9pt!important}
   .report-section:not(.annual-report-section) .table-wrap th,
-  .report-section:not(.annual-report-section) .table-wrap td{padding:5px 4px!important;font-size:8pt!important;line-height:1.2;white-space:normal!important;overflow-wrap:anywhere;vertical-align:middle}
+  .report-section:not(.annual-report-section) .table-wrap td{padding:5px 3px!important;font-size:9pt!important;line-height:1.25;white-space:normal!important;overflow-wrap:anywhere;vertical-align:middle}
   .report-section:not(.annual-report-section) .table-wrap th:nth-child(1),.report-section:not(.annual-report-section) .table-wrap td:nth-child(1){width:16%!important}
   .report-section:not(.annual-report-section) .table-wrap th:nth-child(2),.report-section:not(.annual-report-section) .table-wrap td:nth-child(2){width:7%!important}
   .report-section:not(.annual-report-section) .table-wrap th:nth-child(3),.report-section:not(.annual-report-section) .table-wrap td:nth-child(3){width:12%!important}
@@ -51,5 +51,5 @@
   .report-section:not(.annual-report-section) .table-wrap th:nth-child(6),.report-section:not(.annual-report-section) .table-wrap td:nth-child(6){width:13%!important}
   .report-section:not(.annual-report-section) .table-wrap th:nth-child(7),.report-section:not(.annual-report-section) .table-wrap td:nth-child(7){width:14%!important}
   .report-section:not(.annual-report-section) .table-wrap th:nth-child(8),.report-section:not(.annual-report-section) .table-wrap td:nth-child(8){width:14%!important}
-  .report-section:not(.annual-report-section) .table-wrap td:nth-child(n+3):nth-child(-n+8){font-size:7.5pt!important}
+  .report-section:not(.annual-report-section) .table-wrap td small{font-size:8.5pt}
 }
