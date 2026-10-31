@@ -2,7 +2,7 @@
   "name": "textile-salary-management",
   "version": "1.0.0",
   "private": true,
-  "engines": { "node": ">=22.18.0" },
+  "engines": { "node": ">=24.7.0" },
   "allowScripts": {
     "@parcel/watcher": true,
     "@prisma/engines": true,

@@ -1,0 +1,27 @@
+.login-page{min-height:100vh;background:radial-gradient(ellipse at 16% 0%,#e5efe8 0,transparent 38%),#f3f6f4;display:grid;grid-template-rows:auto 1fr;justify-items:center;align-items:center;padding:32px 18px 80px}
+.login-brand{display:flex;align-items:center;gap:12px;color:#203c30;justify-self:start;width:min(100%,1080px)}
+.login-brand .brand-icon{background:#d9efde;color:#14543d}
+.login-brand strong{display:block;font:700 17px "Manrope",sans-serif}
+.login-brand small{display:block;color:#65776b;font-size:13px;margin-top:3px}
+.login-panel{width:min(100%,440px);padding:34px;align-self:center}
+.login-symbol{width:46px;height:46px;border-radius:12px;background:#edf5ef;color:#176443;display:grid;place-items:center;margin-bottom:20px}
+.login-panel h1{margin:0;color:#203c30;font:750 28px "Manrope",sans-serif}
+.login-panel p{color:#718076;font-size:14px;line-height:1.5;margin:9px 0 24px}
+.login-panel .alert{margin:0 0 18px}
+.login-panel form{display:grid;gap:9px}
+.login-panel label{font-size:13px;font-weight:600;color:#52645a}
+.login-panel input{width:100%;height:44px;border:1px solid #cfdad2;border-radius:8px;background:#fff;color:#172720;padding:0 12px;margin-bottom:10px;outline:none}
+.login-panel input:focus{border-color:#4f9470;box-shadow:0 0 0 3px #4f94701b}
+.password-input-wrap{position:relative}
+.password-input-wrap input{padding-right:52px}
+.password-toggle{position:absolute;right:7px;top:5px;width:34px;height:34px;border:0;border-radius:6px;background:transparent;color:#52645a;display:grid;place-items:center;cursor:pointer}
+.password-toggle:hover{background:#edf5ef;color:#176443}
+.password-toggle:focus-visible{outline:2px solid #4f9470;outline-offset:2px}
+.login-panel .button{width:100%;justify-content:center;margin-top:9px}
+.account-actions{display:flex;align-items:center;gap:12px}
+.account-actions span{font-size:13px;color:#d9e8df;font-weight:600}
+.account-actions .button{border-color:#ffffff55;background:#ffffff12;color:#fff}
+.account-actions .button:hover{background:#ffffff24}
+.sign-out-error{margin:10px auto 0;max-width:1420px}
+@media(max-width:740px){.login-page{padding:20px 14px 50px}.login-panel{padding:26px 22px}.account-actions span{display:none}.account-actions .button{font-size:12px!important;padding:9px!important}.account-actions .button svg{display:none}}
+@media print{.account-actions,.sign-out-error{display:none!important}}

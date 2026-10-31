@@ -1,6 +1,6 @@
 import React from "react";
 import { createRoot } from "react-dom/client";
-import PayrollApp from "./app/PayrollApp.js";
+import { AuthShell } from "./auth/AuthShell.js";
 import "./styles/index.css";
 
 // Native number inputs step their value when scrolled while focused. Blur before
@@ -10,4 +10,4 @@ document.addEventListener("wheel", () => {
   if (active instanceof HTMLInputElement && active.type === "number") active.blur();
 }, { capture: true, passive: true });
 
-createRoot(document.getElementById("root")!).render(<React.StrictMode><PayrollApp /></React.StrictMode>);
+createRoot(document.getElementById("root")!).render(<React.StrictMode><AuthShell /></React.StrictMode>);

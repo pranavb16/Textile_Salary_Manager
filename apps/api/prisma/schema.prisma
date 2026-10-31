@@ -7,6 +7,53 @@ datasource db {
   provider = "postgresql"
 }
 
+model AuthAccount {
+  id             Int           @id
+  username       String        @unique @db.VarChar(100)
+  passwordHash   String        @map("password_hash") @db.VarChar(255)
+  failedAttempts Int           @default(0) @map("failed_attempts")
+  lockedUntil    DateTime?     @map("locked_until")
+  createdAt      DateTime      @default(now()) @map("created_at")
+  updatedAt      DateTime      @updatedAt @map("updated_at")
+  sessions       AuthSession[]
+
+  @@map("auth_accounts")
+}
+
+model AuthSession {
+  id                       String            @id @default(uuid()) @db.Uuid
+  accountId                Int               @map("account_id")
+  refreshTokenHash         String            @unique @map("refresh_token_hash") @db.VarChar(64)
+  previousRefreshTokenHash String?           @unique @map("previous_refresh_token_hash") @db.VarChar(64)
+  previousRefreshUntil     DateTime?         @map("previous_refresh_until")
+  expiresAt                DateTime          @map("expires_at")
+  createdAt                DateTime          @default(now()) @map("created_at")
+  account                  AuthAccount       @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  accessTokens             AuthAccessToken[]
+
+  @@index([expiresAt])
+  @@map("auth_sessions")
+}
+
+model AuthAccessToken {
+  hash      String      @id @db.VarChar(64)
+  sessionId String      @map("session_id") @db.Uuid
+  expiresAt DateTime    @map("expires_at")
+  session   AuthSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([expiresAt])
+  @@map("auth_access_tokens")
+}
+
+model AuthIpLimit {
+  ipHash         String    @id @map("ip_hash") @db.VarChar(64)
+  failedAttempts Int       @default(0) @map("failed_attempts")
+  lockedUntil    DateTime? @map("locked_until")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+
+  @@map("auth_ip_limits")
+}
+
 model Unit {
   id        Int        @id @default(autoincrement())
   name      String     @unique @db.VarChar(100)

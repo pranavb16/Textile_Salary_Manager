@@ -10,7 +10,8 @@
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate deploy",
     "db:migrate:dev": "prisma migrate dev",
-    "test": "node --experimental-vm-modules ../../node_modules/jest/bin/jest.js --runInBand"
+    "test": "node --experimental-vm-modules ../../node_modules/jest/bin/jest.js --runInBand",
+    "auth:hash": "node scripts/hash-password.mjs"
   },
   "dependencies": {
     "@nestjs/common": "^11.1.0",

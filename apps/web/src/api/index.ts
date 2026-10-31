@@ -1,10 +1,9 @@
 import type { AnnualLeaveSaveInput, CreateEmployeeInput, CreateUnitInput, PayrollEntryInput } from "@salary/contracts";
 import type { AnnualLeaveData, AnnualOptions, AnnualReportData, Employee, RecordRow, Unit } from "../types.js";
-
-const API = import.meta.env.VITE_API_BASE_URL || "http://localhost:3001/api";
+import { authorizedRequest } from "../auth/session.js";
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(`${API}${path}`, { ...init, headers: { "content-type": "application/json", ...init?.headers } });
+  const response = await authorizedRequest(path, init);
   const body = await response.json();
   if (!response.ok) throw new Error(body.message || body.error || "The request could not be completed.");
   return body as T;

@@ -1,10 +1,10 @@
 # Textile Salary Management
 
-A local web app for monthly worker payroll, organized by manufacturing unit. The backend uses NestJS modules and Prisma, the database uses PostgreSQL, and the frontend uses React, Vite, and shared Zod validation contracts.
+A local web app for monthly worker payroll, organized by manufacturing unit. The backend uses NestJS modules and Prisma, the database uses PostgreSQL, and the frontend uses React, Vite, and shared Zod validation contracts. One manually configured account signs in to access all payroll and report functions.
 
 ## Start locally
 
-Install dependencies once, and create the local environment files if they do not exist:
+Install Node.js 24.7 or newer, install dependencies once, and create the local environment files if they do not exist:
 
 ```powershell
 npm ci
@@ -24,7 +24,7 @@ In a separate terminal, start the frontend on the host:
 npm run dev
 ```
 
-Open [http://localhost:5173](http://localhost:5173). The API is at `http://localhost:3001/api`. Stop the frontend with Ctrl+C and stop the API/database containers with `docker compose down`; this keeps the PostgreSQL volume and its payroll data. Do not use `docker compose down -v` unless you intend to erase the database.
+Create the single login account using the instructions in [LOCAL-SETUP.md](LOCAL-SETUP.md#configure-the-login-account), then open [http://localhost:5173](http://localhost:5173). Use `localhost` for both the web app and API so the refresh cookie works locally. The API is at `http://localhost:3001/api`. Stop the frontend with Ctrl+C and stop the API/database containers with `docker compose down`; this keeps the PostgreSQL volume and its payroll data. Do not use `docker compose down -v` unless you intend to erase the database.
 
 See [LOCAL-SETUP.md](LOCAL-SETUP.md) for launch, stop, and data notes.
 
@@ -34,6 +34,10 @@ See [LOCAL-SETUP.md](LOCAL-SETUP.md) for launch, stop, and data notes.
 - `apps/web`: React payroll interface, Vite configuration, and styles.
 - `packages/contracts`: shared Zod schemas and TypeScript types used by the API and UI.
 - `docker-compose.yml`: local PostgreSQL and API services; the Vite frontend runs directly on the host; no hosting or publishing is configured.
+
+## Login and sessions
+
+The API denies unauthenticated access to units, workers, payroll, and annual reports. A successful login issues a one-hour access token and a refresh cookie whose lifetime ends exactly 24 hours after login. Refreshing the access token does not extend that deadline. Five consecutive wrong passwords lock the account for 15 minutes; the lockout is stored in PostgreSQL. The login page has no signup or password-reset flow. Follow [LOCAL-SETUP.md](LOCAL-SETUP.md#configure-the-login-account) to generate a password hash and insert the account manually.
 
 ## Payroll rules
 
