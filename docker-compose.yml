@@ -35,6 +35,7 @@ services:
       - .:/workspace
       - workspace_node_modules:/workspace/node_modules
       - api_node_modules:/workspace/apps/api/node_modules
+      - api_dist:/workspace/apps/api/dist
       - contracts_dist:/workspace/packages/contracts/dist
     depends_on:
       db:
@@ -45,4 +46,5 @@ volumes:
   postgres_data:
   workspace_node_modules:
   api_node_modules:
+  api_dist:
   contracts_dist:
