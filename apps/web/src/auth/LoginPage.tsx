@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from "react";
-import { Building2, Eye, EyeOff, LockKeyhole, LogIn } from "lucide-react";
+import { Eye, EyeOff, LockKeyhole, LogIn } from "lucide-react";
 
 export function LoginPage({ message, onLogin }: { message: string; onLogin: (username: string, password: string) => Promise<void> }) {
   const [username, setUsername] = useState("");
@@ -16,7 +16,7 @@ export function LoginPage({ message, onLogin }: { message: string; onLogin: (use
   }
 
   return <main className="login-page">
-    <div className="login-brand"><span className="brand-icon"><Building2 size={22} /></span><div><strong>Textile Salary Manager</strong><small>Monthly payroll · Manufacturing units</small></div></div>
+    <div className="login-brand"><img className="brand-icon" src="/favicon.svg" alt="" /><div><strong>Textile Salary Manager</strong><small>Monthly payroll · Manufacturing units</small></div></div>
     <section className="panel login-panel" aria-labelledby="login-title">
       <span className="login-symbol"><LockKeyhole size={22} /></span>
       <span className="eyebrow">SECURE ACCESS</span>

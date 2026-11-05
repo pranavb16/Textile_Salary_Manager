@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Building2, LogOut, UsersRound } from "lucide-react";
+import { LogOut, UsersRound } from "lucide-react";
 import { createEmployeeSchema, createUnitSchema, payrollFormSchema } from "@salary/contracts";
 import { createEmployee, createUnit, getEmployees, getPayrollRecords, getUnits, savePayrollRecord } from "../api/index.js";
 import { MonthPicker } from "../components/MonthPicker.js";
@@ -188,7 +188,7 @@ export default function PayrollApp({ username, onSignOut, signOutError }: { user
   const reportTitle = `${new Date(`${period}-02T00:00:00`).toLocaleDateString("en-IN", { month: "long", year: "numeric" })} · ${units.find((unit) => String(unit.id) === unitId)?.name}`;
 
   return <main className="app-shell">
-    <header className="topbar"><div className="brand"><span className="brand-icon"><Building2 size={21} /></span><div><strong>Textile Salary Manager</strong><small>Monthly payroll · Manufacturing units</small></div></div><div className="account-actions"><span>{username}</span><button className="button button-outline" type="button" onClick={() => void onSignOut()}><LogOut size={16} /> Sign out</button></div></header>
+    <header className="topbar"><div className="brand"><img className="brand-icon" src="/favicon.svg" alt="" /><div><strong>Textile Salary Manager</strong><small>Monthly payroll · Manufacturing units</small></div></div><div className="account-actions"><span>{username}</span><button className="button button-outline" type="button" onClick={() => void onSignOut()}><LogOut size={16} /> Sign out</button></div></header>
     {signOutError && <div className="alert alert-error sign-out-error" role="alert">{signOutError}</div>}
     <nav className="page-tabs" aria-label="Reports and payroll"><a href="#/monthly-payroll" className={page === "monthly" ? "page-tab active" : "page-tab"} aria-current={page === "monthly" ? "page" : undefined}>Monthly Payroll</a><a href="#/annual-report" className={page === "annual" ? "page-tab active" : "page-tab"} aria-current={page === "annual" ? "page" : undefined}>Annual Salary Report</a></nav>
     {page === "annual" ? <AnnualReportPage units={units} /> : <div className="page-wrap">
