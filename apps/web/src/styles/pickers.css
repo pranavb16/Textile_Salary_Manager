@@ -34,3 +34,4 @@
 .unit-option{display:block;width:100%;min-height:38px;padding:8px 10px;border:1px solid transparent;border-radius:7px;background:#fff;color:#344b3d;text-align:left;font-size:13px;font-weight:500}
 .unit-option:hover{background:#edf5ef;border-color:#dce9df}
 .unit-option.selected{background:#175c42;border-color:#175c42;color:#fff}
+@media(max-width:740px){.unit-picker-popover{min-width:0}}

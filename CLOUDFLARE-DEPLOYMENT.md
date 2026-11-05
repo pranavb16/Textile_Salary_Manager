@@ -7,11 +7,11 @@ The Vite site runs on Cloudflare Pages. Requests from its browser to `/api/*` pa
 1. Deploy the API as a Render Node web service from the repository root. Use Node 24 and these commands:
 
    ```text
-   Build: npm ci && npm run contracts:build && npm run db:generate --workspace @salary/api && npm run build --workspace @salary/api
+   Build: npm ci --include=dev && npm run contracts:build && npm run db:generate --workspace @salary/api && npm run build --workspace @salary/api
    Start: npm run db:migrate --workspace @salary/api && npm run start --workspace @salary/api
    ```
 
-2. Set `DATABASE_DSN` to the production PostgreSQL connection string and `NODE_ENV=production`. Render supplies `PORT`. Set `WEB_ORIGIN` to the exact production Pages origin, for example `https://textile-salary-web.pages.dev`. Do not include a trailing slash. Do not use the local Compose database hostname `db` in the production connection string.
+2. Set `DATABASE_DSN` to the production PostgreSQL connection string and `NODE_ENV=production`. The build command uses `npm ci --include=dev` because Nest and Prisma build tools are development dependencies that npm otherwise omits when `NODE_ENV=production`. Render supplies `PORT`. Set `WEB_ORIGIN` to the exact production Pages origin, for example `https://textile-salary-web.pages.dev`. Do not include a trailing slash. Do not use the local Compose database hostname `db` in the production connection string.
 3. Run the existing account setup from `LOCAL-SETUP.md` against the production database after migrations complete. If you are moving existing data, back it up and verify the imported row counts before using the production site.
 
 ## Configure Pages
