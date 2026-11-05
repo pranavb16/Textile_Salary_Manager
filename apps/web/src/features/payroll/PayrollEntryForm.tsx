@@ -6,6 +6,7 @@ import type { FieldErrors, Form, FormField } from "../../types.js";
 
 export function PayrollEntryForm({
   unitSelected,
+  workersLoading,
   selectedEmployeeName,
   form,
   editingId,
@@ -30,6 +31,7 @@ export function PayrollEntryForm({
   formatMoney,
 }: {
   unitSelected: boolean;
+  workersLoading: boolean;
   selectedEmployeeName?: string;
   form: Form;
   editingId: number | null;
@@ -55,7 +57,7 @@ export function PayrollEntryForm({
 }) {
   return <section className="panel entry-panel"><div className="section-heading"><h1>Worker payroll entry</h1></div>
     {!unitSelected ? <div className="empty-hint">Choose a month and unit to start entering payroll.</div> : <form onSubmit={onSubmit} className="entry-form" noValidate>
-      <div className="worker-entry"><label>Worker<button type="button" className="worker-select" onClick={onSelectWorker}>{selectedEmployeeName || "Select one worker"}<UsersRound size={17} /></button><small className={`field-error${(submitted || touched.employeeId) && fieldErrors.employeeId ? "" : " field-error-empty"}`} aria-live="polite">{(submitted || touched.employeeId) ? fieldErrors.employeeId ?? "\u00a0" : "\u00a0"}</small></label>
+      <div className="worker-entry"><label>Worker<button type="button" className="worker-select" onClick={onSelectWorker} disabled={workersLoading}>{workersLoading ? "Loading workers…" : selectedEmployeeName || "Select one worker"}<UsersRound size={17} /></button><small className={`field-error${(submitted || touched.employeeId) && fieldErrors.employeeId ? "" : " field-error-empty"}`} aria-live="polite">{(submitted || touched.employeeId) ? fieldErrors.employeeId ?? "\u00a0" : "\u00a0"}</small></label>
         <label className="mender-toggle"><input type="checkbox" checked={form.isMender} onChange={(event) => onMenderChange(event.target.checked)} /> Is this worker a Mender?</label>
       </div>
       {form.isMender ? <div className="field-grid">

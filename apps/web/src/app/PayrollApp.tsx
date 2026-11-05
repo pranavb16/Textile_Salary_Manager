@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { LogOut, UsersRound } from "lucide-react";
 import { createEmployeeSchema, createUnitSchema, payrollFormSchema } from "@salary/contracts";
 import { createEmployee, createUnit, getEmployees, getPayrollRecords, getUnits, savePayrollRecord } from "../api/index.js";
@@ -45,6 +45,8 @@ export default function PayrollApp({ username, onSignOut, signOutError }: { user
   const [units, setUnits] = useState<Unit[]>([]);
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [records, setRecords] = useState<RecordRow[]>([]);
+  const [loadedPayrollKey, setLoadedPayrollKey] = useState("");
+  const loadSequence = useRef(0);
   const [unitId, setUnitId] = useState("");
   const [period, setPeriod] = useState(monthNow);
   const [form, setForm] = useState<Form>(emptyForm);
@@ -81,18 +83,23 @@ export default function PayrollApp({ username, onSignOut, signOutError }: { user
   const employeeStartingBalanceError = employeeStartingBalanceValidation.success ? undefined : employeeStartingBalanceValidation.error.issues[0]?.message;
 
   const reload = useCallback(async () => {
+    const sequence = ++loadSequence.current;
+    setLoadedPayrollKey("");
     try {
       const loadedUnits = await getUnits();
+      if (sequence !== loadSequence.current) return;
       setUnits(loadedUnits);
       if (!unitId) { setEmployees([]); setRecords([]); return; }
       const [staff, payroll] = await Promise.all([
         getEmployees(unitId, period),
         getPayrollRecords(unitId, period),
       ]);
+      if (sequence !== loadSequence.current) return;
       setEmployees(staff);
       setRecords(payroll);
+      setLoadedPayrollKey(`${unitId}:${period}`);
       setError("");
-    } catch (cause) { setError(cause instanceof Error ? cause.message : "Could not load the payroll data."); }
+    } catch (cause) { if (sequence === loadSequence.current) setError(cause instanceof Error ? cause.message : "Could not load the payroll data."); }
   }, [unitId, period]);
 
   useEffect(() => { void reload(); }, [reload]);
@@ -179,9 +186,14 @@ export default function PayrollApp({ username, onSignOut, signOutError }: { user
     catch (cause) { setError(cause instanceof Error ? cause.message : "Could not add the worker."); closeManageDialog(); }
   }
 
-  function editPayroll(row: RecordRow) {
+  function loadPayrollIntoForm(row: RecordRow) {
     setEditingId(row.id);
     setForm({ employeeId: String(row.employeeId), isMender: row.isMender, mendingMetres: row.mendingMetres ?? "", mendingRate: row.mendingRate ?? "", totalDays: String(row.totalDays), shift8Days: String(row.shift8Days), shift12Days: String(row.shift12Days), shift8Rate: row.shift8Rate, shift12Rate: row.shift12Rate, cashPaid: row.cashPaid, bankPaid: row.bankPaid, advanceRequested: row.advanceRequested });
+    setTouched({}); setSubmitted(false);
+  }
+
+  function editPayroll(row: RecordRow) {
+    loadPayrollIntoForm(row);
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
@@ -197,6 +209,7 @@ export default function PayrollApp({ username, onSignOut, signOutError }: { user
       <div className="workspace">
         <PayrollEntryForm
           unitSelected={Boolean(unitId)}
+          workersLoading={loadedPayrollKey !== `${unitId}:${period}`}
           selectedEmployeeName={selectedEmployee?.name}
           form={form}
           editingId={editingId}
@@ -220,10 +233,15 @@ export default function PayrollApp({ username, onSignOut, signOutError }: { user
           onCancelEdit={resetForm}
           formatMoney={formatMoney}
         />
-        <PayrollReport unitSelected={Boolean(unitId)} title={reportTitle} records={records} onPrint={() => window.print()} onEdit={editPayroll} />
+        <PayrollReport unitSelected={Boolean(unitId)} title={reportTitle} records={loadedPayrollKey === `${unitId}:${period}` ? records : []} onPrint={() => window.print()} onEdit={editPayroll} />
       </div>
     </div>}
-    <WorkerPicker open={chooseWorker} employees={employees} onClose={() => setChooseWorker(false)} onSelect={(employee) => { set("employeeId", String(employee.id)); setChooseWorker(false); }} />
+    <WorkerPicker open={chooseWorker && loadedPayrollKey === `${unitId}:${period}`} employees={employees} onClose={() => setChooseWorker(false)} onSelect={(employee) => {
+      const existingRecord = records.find((record) => record.employeeId === employee.id);
+      if (existingRecord) loadPayrollIntoForm(existingRecord);
+      else { resetForm(); setForm({ ...emptyForm, employeeId: String(employee.id) }); }
+      setChooseWorker(false);
+    }} />
     <ManageDataDialog
       open={manageData}
       units={units}

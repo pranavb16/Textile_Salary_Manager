@@ -21,6 +21,7 @@
 .bank-payout-cell .payout-error{min-height:1.3em;margin:0;line-height:1.3}
 .entry-form>.form-actions{grid-column:1/-1;align-self:start;justify-self:stretch;justify-content:center;margin-top:10px}
 .form-actions{align-items:flex-start}
+.entry-form .button-quiet:hover{background:#e5f2e8;color:#14543d}
 @media(max-width:740px){.advance-payout-fields,.payout-summary-row{column-gap:8px}}
 @media(max-width:740px){
   .entry-form .field-grid{grid-template-columns:minmax(0,1fr);row-gap:8px}
