@@ -22,6 +22,7 @@
     "docker:up": "docker compose up --build",
     "docker:down": "docker compose down",
     "test:proxy": "node --test tests/pages-proxy.test.mjs",
-    "test": "npm run contracts:build && npm run db:generate && npm run test --workspaces --if-present && npm run test:proxy"
+    "test:startup": "node --test --test-isolation=none tests/api-startup.test.mjs",
+    "test": "npm run contracts:build && npm run db:generate && npm run test --workspaces --if-present && npm run test:proxy && npm run test:startup"
   }
 }

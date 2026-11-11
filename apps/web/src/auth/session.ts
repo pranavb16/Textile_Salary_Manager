@@ -33,11 +33,15 @@ function remember(session: Session) {
   if (renewal > 0 && renewal < remaining) renewalTimer = window.setTimeout(() => { void refreshAccess().catch(() => { /* Retried on the next request. */ }); }, renewal);
 }
 async function authResponse(response: Response) {
+  const body = await response.json().catch(() => null);
   if (!response.ok) {
-    const body = await response.json().catch(() => ({}));
-    throw new Error(typeof body.message === "string" ? body.message : "Could not sign in. Please try again.");
+    throw new Error(typeof body?.message === "string" ? body.message : `The server returned an error (${response.status}). Please try again.`);
   }
-  return response.json() as Promise<Session>;
+  if (!body || typeof body.username !== "string" || typeof body.accessToken !== "string" ||
+      typeof body.accessExpiresAt !== "string" || typeof body.sessionExpiresAt !== "string") {
+    throw new Error("The server returned an unexpected response. Please try again.");
+  }
+  return body as Session;
 }
 
 export async function signIn(username: string, password: string) {

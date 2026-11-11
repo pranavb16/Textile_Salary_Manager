@@ -38,4 +38,15 @@ The Vite site runs on Cloudflare Pages. Requests from its browser to `/api/*` pa
 - Reload the page, save a test payroll record, and sign out. Confirm refresh works after reload and protected requests return 401 after logout.
 - Test once after the free Render service has been idle; its first request can take longer while it wakes.
 
+## Troubleshoot intermittent sign-in errors
+
+The page first calls `POST /api/auth/refresh` to restore an existing session. A 401 on that request when signed out is normal. Other failures can come from Pages, the Render service, origin settings, or the database. The health endpoint checks that the API process responds; it does not verify a database query or the authentication flow.
+
+In browser developer tools, open Network, reload the page, and inspect the refresh request's status and response. Compare `GET /api/health` on the Pages hostname with `GET /api/health` on the Render hostname at the same time, and check Render logs for that time. Never share cookies, tokens, credentials, or database connection strings.
+
+- A Pages 503 saying the API is not configured means `API_UPSTREAM_ORIGIN` is missing or invalid in that Pages environment. A Pages 502 indicates the proxy could not reach the upstream.
+- A 403 saying the origin is not allowed means `WEB_ORIGIN` on Render must include the exact browser origin, including scheme and hostname. Configure preview origins separately as needed.
+- A 500 on refresh or login requires checking Render logs, including database and migration errors. A successful health check alone does not rule these out.
+- If failures occur after inactivity and the Render service uses the free instance type, check its spin-up logs. Render spins free services down after 15 minutes without inbound traffic; startup can take about a minute. A paid instance avoids idle spin-down. Retest both health URLs after it has started.
+
 The API remains a separate public Render service. Its global authentication guard protects payroll and report routes even when a request bypasses the Pages proxy. Keep database credentials only in Render, never in Pages or `VITE_` variables.
