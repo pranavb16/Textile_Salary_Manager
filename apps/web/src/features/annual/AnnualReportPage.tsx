@@ -1,3 +1,5 @@
+import { ExcelExportButton } from "../../components/ExcelExportButton.js";
+import { annualExcelReport } from "../../lib/export-report.js";
 import { useEffect, useRef, useState } from "react";
 import { FileDown } from "lucide-react";
 import { annualBonusRateSchema, annualLeaveSaveSchema } from "@salary/contracts";
@@ -135,10 +137,10 @@ export function AnnualReportPage({ units }: { units: Unit[] }) {
 
     {report && <section className="report-section annual-report-section" aria-labelledby="annual-report-title">
       <h2 id="annual-report-title" className="report-section-title">Annual report</h2>
-      <div className="panel report-panel"><div className="report-head"><div><h2>Annual Salary Report · {report.unit.name}</h2><p>{displayMonth(report.startPeriod)} to {displayMonth(report.endPeriod)} · {report.rows.length} worker{report.rows.length === 1 ? "" : "s"}</p></div><button type="button" className="button button-outline" onClick={() => window.print()}><FileDown size={17} /> Print / Save PDF</button></div>
-        <div className="table-wrap annual-table-wrap"><table><thead><tr><th>Worker name</th><th>Total salary earned</th><th>Bonus rate</th><th>Diwali Bonus</th><th>Earned Leave Salary</th><th>Closing advance</th><th>Final Bonus</th></tr></thead><tbody>
-          {report.rows.map((row) => <tr key={row.employeeId}><td><strong>{row.name}</strong>{row.employeeCode && <small>{row.employeeCode}</small>}</td><td>{formatMoney(row.salaryEarned)}</td><td>{row.bonusRate}</td><td>{formatMoney(row.diwaliBonus)}</td><td>{formatMoney(row.earnedLeaveSalary)}</td><td className={Number(row.closingAdvance) < 0 ? "balance-held" : "balance-advance"}>{formatMoney(row.closingAdvance)}</td><td className="annual-final-bonus">{formatMoney(row.finalBonus)}</td></tr>)}
-          <tr className="annual-total-row"><td><strong>Total</strong></td><td>{formatMoney(report.totals.salaryEarned)}</td><td>{report.totals.bonusRate}</td><td>{formatMoney(report.totals.diwaliBonus)}</td><td>{formatMoney(report.totals.earnedLeaveSalary)}</td><td>{formatMoney(report.totals.closingAdvance)}</td><td>{formatMoney(report.totals.finalBonus)}</td></tr>
+      <div className="panel report-panel"><div className="report-head"><div><h2>Annual Salary Report · {report.unit.name}</h2><p>{displayMonth(report.startPeriod)} to {displayMonth(report.endPeriod)} · {report.rows.length} worker{report.rows.length === 1 ? "" : "s"}</p></div><div className="report-actions"><ExcelExportButton report={annualExcelReport(report)} /><button type="button" className="button button-outline" aria-label="Print / Save PDF" title="Print / Save PDF" onClick={() => window.print()}><FileDown size={17} /> Print / Save PDF</button></div></div>
+        <div className="table-wrap annual-table-wrap"><table><thead><tr><th>Worker name</th><th>Total salary earned</th><th>Bonus rate</th><th>Diwali Bonus</th><th>Earned Leave Salary</th><th>Closing advance</th><th>Final Bonus</th><th className="signature-column">Sign</th></tr></thead><tbody>
+          {report.rows.map((row) => <tr key={row.employeeId}><td><strong>{row.name}</strong>{row.employeeCode && <small>{row.employeeCode}</small>}</td><td>{formatMoney(row.salaryEarned)}</td><td>{row.bonusRate}</td><td>{formatMoney(row.diwaliBonus)}</td><td>{formatMoney(row.earnedLeaveSalary)}</td><td className={Number(row.closingAdvance) < 0 ? "balance-held" : "balance-advance"}>{formatMoney(row.closingAdvance)}</td><td className="annual-final-bonus">{formatMoney(row.finalBonus)}</td><td className="signature-column"></td></tr>)}
+          <tr className="annual-total-row"><td><strong>Total</strong></td><td>{formatMoney(report.totals.salaryEarned)}</td><td>{report.totals.bonusRate}</td><td>{formatMoney(report.totals.diwaliBonus)}</td><td>{formatMoney(report.totals.earnedLeaveSalary)}</td><td>{formatMoney(report.totals.closingAdvance)}</td><td className="annual-final-bonus">{formatMoney(report.totals.finalBonus)}</td><td className="signature-column"></td></tr>
         </tbody></table></div>
       </div>
     </section>}

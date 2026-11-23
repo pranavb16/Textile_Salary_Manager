@@ -1,0 +1,36 @@
+/* Shared widths and padding keep each heading directly above its values. */
+.monthly-report-section .table-wrap table{width:100%;min-width:1080px;table-layout:fixed}
+.monthly-report-section .table-wrap th,
+.monthly-report-section .table-wrap td{padding:14px 10px;text-align:left;vertical-align:middle;white-space:normal;overflow-wrap:anywhere}
+.monthly-report-section .table-wrap th{word-break:normal;overflow-wrap:normal;line-height:1.35}
+.monthly-report-section .table-wrap :is(th,td):nth-child(1){width:var(--worker-width,16%)}
+.monthly-report-section .table-wrap :is(th,td):nth-child(2){width:var(--days-width,8%)}
+.monthly-report-section .table-wrap :is(th,td):nth-child(3){width:var(--salary-width,10%)}
+.monthly-report-section .table-wrap :is(th,td):nth-child(4),
+.monthly-report-section .table-wrap :is(th,td):nth-child(5){width:var(--payment-width,9%)}
+.monthly-report-section .table-wrap :is(th,td):nth-child(6){width:var(--opening-width,10%)}
+.monthly-report-section .table-wrap :is(th,td):nth-child(7){width:11%}
+.monthly-report-section .table-wrap :is(th,td):nth-child(8){width:var(--closing-width,10%)}
+.monthly-report-section .table-wrap .signature-column{width:var(--sign-width,10%);min-width:0}
+.monthly-report-section .table-wrap .screen-only{width:7%;text-align:center}
+.monthly-report-section .table-wrap .empty-row{text-align:center}
+
+@media screen{
+  /* Keep the empty Sign column compact and align Edit with the other headings. */
+  .monthly-report-section{--sign-width:6%;--worker-width:16%;--salary-width:11%;--payment-width:10%;--opening-width:11%}
+  /* Inset the worker heading and names equally from the panel edge. */
+  .monthly-report-section .table-wrap :is(th,td):first-child{padding-left:22px}
+  .monthly-report-section .table-wrap .screen-only{text-align:left}
+}
+
+@media print{
+  /* Visible columns total 100% when the Edit column is hidden. */
+  .monthly-report-section{--days-width:9%;--salary-width:11%;--payment-width:10%;--opening-width:11%;--closing-width:11%;--sign-width:11%;break-inside:auto}
+  .monthly-report-section .report-panel,.monthly-report-section .table-wrap{overflow:visible!important}
+  .monthly-report-section .table-wrap table{min-width:0;width:100%;font-size:9pt}
+  .monthly-report-section .table-wrap th,
+  .monthly-report-section .table-wrap td{padding:7px 5px;font-size:9pt;line-height:1.3}
+  .monthly-report-section .table-wrap .signature-column{width:var(--sign-width)!important}
+  .monthly-report-section .table-wrap td small{font-size:8pt;line-height:1.35}
+  .monthly-report-section thead{display:table-header-group}
+}
