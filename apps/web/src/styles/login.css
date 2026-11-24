@@ -19,9 +19,12 @@
 .password-toggle:focus-visible{outline:2px solid #4f9470;outline-offset:2px}
 .login-panel .button{width:100%;justify-content:center;margin-top:9px}
 .account-actions{display:flex;align-items:center;gap:12px}
-.account-actions span{font-size:13px;color:#d9e8df;font-weight:600}
+/* Keep the account identity together and constrain long usernames. */
+.account-profile{display:flex;flex-direction:column;align-items:center;gap:3px;min-width:0;max-width:150px}
+.account-avatar{width:31px;height:31px;border-radius:50%;display:grid;place-items:center;color:#d9e8df;background:#ffffff1a;border:1px solid #ffffff40;flex:none}
+.account-actions .account-name{display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;line-height:1.2;color:#d9e8df;font-weight:600}
 .account-actions .button{border-color:#ffffff55;background:#ffffff12;color:#fff}
 .account-actions .button:hover{background:#ffffff24}
 .sign-out-error{margin:10px auto 0;max-width:1420px}
-@media(max-width:740px){.login-page{padding:20px 14px 50px}.login-panel{padding:26px 22px}.account-actions span{display:none}.account-actions .button{font-size:12px!important;padding:9px!important}.account-actions .button svg{display:none}}
+@media(max-width:740px){.login-page{padding:20px 14px 50px}.login-panel{padding:26px 22px}.account-actions{gap:8px;min-width:0}.account-profile{max-width:85px}.brand{min-width:0}.brand>div{min-width:0}.brand strong,.brand small{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.account-actions .button{font-size:12px!important;padding:9px!important}.account-actions .button svg{display:none}}
 @media print{.account-actions,.sign-out-error{display:none!important}}
